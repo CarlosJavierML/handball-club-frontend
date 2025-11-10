@@ -1,156 +1,157 @@
-'use client';
+"use client"
 
-import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  Users,
-  UserCog,
-  Shield,
-  Calendar,
-  TrendingUp,
-  DollarSign,
-  Trophy,
-  Activity,
-  ArrowRight,
-} from 'lucide-react';
-import Link from 'next/link';
-import { useAuth } from '@/providers/auth-provider';
-import { playersApi, coachesApi, teamsApi, matchesApi, paymentsApi } from '@/lib/api-client';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { useQuery } from "@tanstack/react-query"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Users, UserCog, Shield, Calendar, TrendingUp, DollarSign, Trophy, Activity, ArrowRight } from "lucide-react"
+import Link from "next/link"
+import { useAuth } from "@/providers/auth-provider"
+import { playersApi, coachesApi, teamsApi, matchesApi, paymentsApi } from "@/lib/api-client"
+import { format } from "date-fns"
+import { es } from "date-fns/locale"
 
 export default function DashboardPage() {
-  const { user, loading } = useAuth();
+  const { user, loading } = useAuth()
 
-  // Queries para datos del dashboard
   const { data: players } = useQuery({
-    queryKey: ['players'],
+    queryKey: ["players"],
     queryFn: async () => {
-      const response = await playersApi.getAll();
-      return response.data;
+      const response = await playersApi.getAll()
+      return response.data
     },
-  });
+  })
 
   const { data: coaches } = useQuery({
-    queryKey: ['coaches'],
+    queryKey: ["coaches"],
     queryFn: async () => {
-      const response = await coachesApi.getAll();
-      return response.data;
+      const response = await coachesApi.getAll()
+      return response.data
     },
-  });
+  })
 
   const { data: teams } = useQuery({
-    queryKey: ['teams'],
+    queryKey: ["teams"],
     queryFn: async () => {
-      const response = await teamsApi.getAll();
-      return response.data;
+      const response = await teamsApi.getAll()
+      return response.data
     },
-  });
+  })
 
   const { data: upcomingMatches } = useQuery({
-    queryKey: ['matches', 'upcoming'],
+    queryKey: ["matches", "upcoming"],
     queryFn: async () => {
-      const response = await matchesApi.getUpcoming();
-      return response.data;
+      const response = await matchesApi.getUpcoming()
+      return response.data
     },
-  });
+  })
 
   const { data: paymentStats } = useQuery({
-    queryKey: ['payments', 'statistics'],
+    queryKey: ["payments", "statistics"],
     queryFn: async () => {
-      const response = await paymentsApi.getStatistics();
-      return response.data;
+      const response = await paymentsApi.getStatistics()
+      return response.data
     },
-  });
+  })
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
+    return new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
       minimumFractionDigits: 0,
-    }).format(amount);
-  };
+    }).format(amount)
+  }
 
   const quickActions = [
-    { label: 'Nuevo Jugador', href: '/dashboard/players/new', icon: Users, roles: ['admin', 'manager'] },
-    { label: 'Nuevo Entrenador', href: '/dashboard/coaches/new', icon: UserCog, roles: ['admin', 'manager'] },
-    { label: 'Nuevo Equipo', href: '/dashboard/teams/new', icon: Shield, roles: ['admin', 'manager'] },
-    { label: 'Nuevo Partido', href: '/dashboard/matches/new', icon: Trophy, roles: ['admin', 'manager'] },
-    { label: 'Registrar Pago', href: '/dashboard/payments/new', icon: DollarSign, roles: ['admin', 'manager'] },
-    { label: 'Nuevo Evento', href: '/dashboard/events/new', icon: Calendar, roles: ['admin', 'manager'] },
-  ];
+    { label: "Nuevo Jugador", href: "/dashboard/players/new", icon: Users, roles: ["admin", "manager"] },
+    { label: "Nuevo Entrenador", href: "/dashboard/coaches/new", icon: UserCog, roles: ["admin", "manager"] },
+    { label: "Nuevo Equipo", href: "/dashboard/teams/new", icon: Shield, roles: ["admin", "manager"] },
+    { label: "Nuevo Partido", href: "/dashboard/matches/new", icon: Trophy, roles: ["admin", "manager"] },
+    { label: "Registrar Pago", href: "/dashboard/payments/new", icon: DollarSign, roles: ["admin", "manager"] },
+    { label: "Nuevo Evento", href: "/dashboard/events/new", icon: Calendar, roles: ["admin", "manager"] },
+  ]
 
-  const filteredActions = quickActions.filter(action =>
-    action.roles.includes(user?.role || '')
-  );
+  const filteredActions = quickActions.filter((action) => action.roles.includes(user?.role || ""))
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Bienvenido de nuevo, {user?.firstName} 👋
-        </p>
+      <div className="flex items-end justify-between">
+        <div>
+          <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">Dashboard</h1>
+          <p className="text-slate-600 dark:text-slate-400">
+            Bienvenido de nuevo, <span className="font-semibold">{user?.firstName}</span> 👋
+          </p>
+        </div>
       </div>
 
-      {/* Estadísticas Principales */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
+        <Card className="border-0 shadow-md hover:shadow-lg transition-shadow bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Entrenadores</CardTitle>
-            <UserCog className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">Entrenadores</CardTitle>
+            <div className="p-2.5 bg-blue-600/20 rounded-lg">
+              <UserCog className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{coaches?.length || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Staff técnico
-            </p>
+            <div className="text-3xl font-bold text-slate-900 dark:text-white">{coaches?.length || 0}</div>
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Staff técnico activo</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-0 shadow-md hover:shadow-lg transition-shadow bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Equipos</CardTitle>
-            <Shield className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">Equipos</CardTitle>
+            <div className="p-2.5 bg-green-600/20 rounded-lg">
+              <Shield className="h-5 w-5 text-green-600 dark:text-green-400" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{teams?.length || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Equipos activos
-            </p>
+            <div className="text-3xl font-bold text-slate-900 dark:text-white">{teams?.length || 0}</div>
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Equipos compitiendo</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-0 shadow-md hover:shadow-lg transition-shadow bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Ingresos Mensuales</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">Jugadores</CardTitle>
+            <div className="p-2.5 bg-purple-600/20 rounded-lg">
+              <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-3xl font-bold text-slate-900 dark:text-white">{players?.length || 0}</div>
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Jugadores registrados</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-md hover:shadow-lg transition-shadow bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">Ingresos</CardTitle>
+            <div className="p-2.5 bg-orange-600/20 rounded-lg">
+              <DollarSign className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-slate-900 dark:text-white">
               {formatCurrency(paymentStats?.totalPaidAmount || 0)}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {paymentStats?.paid || 0} pagos este mes
-            </p>
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">{paymentStats?.paid || 0} pagos este mes</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Acciones Rápidas */}
       {filteredActions.length > 0 && (
         <div>
-          <h2 className="text-xl font-semibold mb-4">Acciones Rápidas</h2>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Acciones Rápidas</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {filteredActions.map((action) => (
               <Link key={action.href} href={action.href}>
-                <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                  <CardContent className="flex flex-col items-center justify-center p-6 space-y-2">
-                    <action.icon className="h-8 w-8 text-primary" />
-                    <p className="text-sm font-medium text-center">{action.label}</p>
+                <Card className="border-0 shadow-sm hover:shadow-md transition-all hover:scale-105 cursor-pointer bg-white dark:bg-slate-800/50">
+                  <CardContent className="flex flex-col items-center justify-center p-6 space-y-3">
+                    <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg">
+                      <action.icon className="h-6 w-6 text-white" />
+                    </div>
+                    <p className="text-sm font-semibold text-center text-slate-900 dark:text-white">{action.label}</p>
                   </CardContent>
                 </Card>
               </Link>
@@ -161,7 +162,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Próximos Partidos */}
-        <Card>
+        <Card className="border-0 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Próximos Partidos</CardTitle>
             <Link href="/dashboard/matches">
@@ -173,15 +174,13 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             {upcomingMatches?.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No hay partidos próximos
-              </div>
+              <div className="text-center py-8 text-muted-foreground">No hay partidos próximos</div>
             ) : (
               <div className="space-y-4">
                 {upcomingMatches?.slice(0, 3).map((match: any) => (
                   <div
                     key={match.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors"
+                    className="flex items-center justify-between p-4 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
@@ -208,7 +207,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* Estado de Pagos */}
-        <Card>
+        <Card className="border-0 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Estado de Pagos</CardTitle>
             <Link href="/dashboard/payments">
@@ -220,57 +219,49 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 border rounded-lg bg-green-50 dark:bg-green-950">
+              <div className="flex items-center justify-between p-4 border border-green-200 dark:border-green-900/30 rounded-lg bg-green-50 dark:bg-green-950/30">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-100 dark:bg-green-900 rounded-full">
+                  <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-full">
                     <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
                   </div>
                   <div>
-                    <p className="font-medium">Pagados</p>
-                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                      {paymentStats?.paid || 0}
-                    </p>
+                    <p className="font-medium text-sm">Pagados</p>
+                    <p className="text-xl font-bold text-green-600 dark:text-green-400">{paymentStats?.paid || 0}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-muted-foreground">Total</p>
-                  <p className="font-semibold">
-                    {formatCurrency(paymentStats?.totalPaidAmount || 0)}
-                  </p>
+                  <p className="text-xs text-muted-foreground">Total</p>
+                  <p className="font-semibold">{formatCurrency(paymentStats?.totalPaidAmount || 0)}</p>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-4 border rounded-lg bg-yellow-50 dark:bg-yellow-950">
+              <div className="flex items-center justify-between p-4 border border-yellow-200 dark:border-yellow-900/30 rounded-lg bg-yellow-50 dark:bg-yellow-950/30">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-yellow-100 dark:bg-yellow-900 rounded-full">
+                  <div className="p-2 bg-yellow-100 dark:bg-yellow-900/50 rounded-full">
                     <Activity className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
                   </div>
                   <div>
-                    <p className="font-medium">Pendientes</p>
-                    <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                    <p className="font-medium text-sm">Pendientes</p>
+                    <p className="text-xl font-bold text-yellow-600 dark:text-yellow-400">
                       {paymentStats?.pending || 0}
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-muted-foreground">Por cobrar</p>
-                  <p className="font-semibold">
-                    {formatCurrency(paymentStats?.totalPendingAmount || 0)}
-                  </p>
+                  <p className="text-xs text-muted-foreground">Por cobrar</p>
+                  <p className="font-semibold">{formatCurrency(paymentStats?.totalPendingAmount || 0)}</p>
                 </div>
               </div>
 
               {paymentStats?.overdue > 0 && (
-                <div className="flex items-center justify-between p-4 border rounded-lg bg-red-50 dark:bg-red-950">
+                <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900/30 rounded-lg bg-red-50 dark:bg-red-950/30">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-red-100 dark:bg-red-900 rounded-full">
+                    <div className="p-2 bg-red-100 dark:bg-red-900/50 rounded-full">
                       <TrendingUp className="h-5 w-5 text-red-600 dark:text-red-400" />
                     </div>
                     <div>
-                      <p className="font-medium">Vencidos</p>
-                      <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-                        {paymentStats?.overdue || 0}
-                      </p>
+                      <p className="font-medium text-sm">Vencidos</p>
+                      <p className="text-xl font-bold text-red-600 dark:text-red-400">{paymentStats?.overdue || 0}</p>
                     </div>
                   </div>
                   <Link href="/dashboard/payments?tab=overdue">
@@ -286,20 +277,23 @@ export default function DashboardPage() {
       </div>
 
       {/* Actividad Reciente */}
-      <Card>
+      <Card className="border-0 shadow-md">
         <CardHeader>
           <CardTitle>Actividad Reciente del Sistema</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="flex items-start gap-4">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-full">
                 <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium">Nuevos jugadores registrados</p>
                 <p className="text-xs text-muted-foreground">
-                  {players?.slice(0, 3).map((p: any) => `${p.firstName} ${p.lastName}`).join(', ')}
+                  {players
+                    ?.slice(0, 3)
+                    .map((p: any) => `${p.firstName} ${p.lastName}`)
+                    .join(", ")}
                 </p>
               </div>
               <span className="text-xs text-muted-foreground">Hoy</span>
@@ -307,7 +301,7 @@ export default function DashboardPage() {
 
             {upcomingMatches?.length > 0 && (
               <div className="flex items-start gap-4">
-                <div className="p-2 bg-green-100 dark:bg-green-900 rounded-full">
+                <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-full">
                   <Trophy className="h-4 w-4 text-green-600 dark:text-green-400" />
                 </div>
                 <div className="flex-1">
@@ -324,7 +318,7 @@ export default function DashboardPage() {
 
             {teams?.length > 0 && (
               <div className="flex items-start gap-4">
-                <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-full">
+                <div className="p-2 bg-purple-100 dark:bg-purple-900/50 rounded-full">
                   <Shield className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div className="flex-1">
@@ -340,5 +334,5 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }
